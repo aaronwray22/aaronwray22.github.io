@@ -3,30 +3,309 @@
 <head>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/3.0.0-rc4/vega.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.0.0-beta.10/vega-lite.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.0.0-beta.19/vega-embed.js"></script>
+    <script src="data.js"></script>
 </head>
 <body>
 
 <div class="container">
-    <h2>Animated Bar Chart</h2>
-
-    <div id="svg-container">
-        <svg id="viz" width="720" height="405"></svg>
-    </div>
+    <h1 id="title">The Impact of Falling Costs on Solar Adoption</h1>
+    <div id="viz"></div>
+    <div id="viz2"></div>
 </div>
-<script>
- var data = [5,9,10,11,12];
- var width = 720;
-    var height = 405;
- var join = d3.select("#viz").selectAll("rect").data(data);
-join.enter().append("rect").merge(join)
-.attr("height",function(d){return 10*d;})
-.attr("width",15)
-.attr("x",function(d,i){return 20*i})
-.attr("y",function(d){return (height/2.0)-(5.0*d)})
-.attr("tokenid",function(d,i){return d*i*64})
-.attr("fill","steelblue")
-join.exit().remove()
+<script type="text/javascript">
+    var d =
+        {
+            "$schema": "https://vega.github.io/schema/vega/v3.0.json",
+            "width": 400,
+            "height": 200,
+            "padding": { "top": 10, "left": 80, "bottom": 30, "right": 10 },
+            "data": data,
+            "scales": [
+                {
+                    "name": "x",
+                    "type": "band",
+                    "range": "width",
+                    "domain": { "data": "pv", "field": "Year_Installed" }
+                },
+                {
+                    "name": "y",
+                    "type": "linear",
+                    "range": "height",
+                    "nice": true,
+                    "zero": true,
+                    "domain": { "data": "pv", "field": "Installation_Count" }
+                }
+            ],
+            "axes": [
+                { "orient": "bottom", "scale": "x" },
+                { "orient": "left", "scale": "y" }
+            ],
+           "signals": [
+                {
+                  "name": "tooltip",
+                  "value": {},
+                  "on": [
+                    {"events": "rect:mouseover", "update": "datum"},
+                    {"events": "rect:mouseout",  "update": "{}"}
+                  ]
+                }
+              ],
+            "marks": [
+                {
+                    "type": "rect",
+                    "from": { "data": "pv" },
+                    "encode": {
+                        "enter": {
+                            "x": { "scale": "x", "field": "Year_Installed", "offset": 1 },
+                            "width": { "scale": "x", "band": 1, "offset": -1 },
+                            "y": { "scale": "y", "field": "Installation_Count" },
+                            "y2": { "scale": "y", "value": 0 }
+                        },
+                        "update": {
+                            "fill": { "value": "steelblue" }
+                        },
+                        "hover": {
+                            "fill": { "value": "red" }
+                        }
+                    }
+                },{
+                        "type": "text",
+                        "encode": {
+                            "enter": {
+                                "align": { "value": "center" },
+                                "baseline": { "value": "bottom" },
+                                "fill": { "value": "#333" }
+
+                            },
+                            "update": {
+                                "x": { "scale": "x", "signal": "tooltip.Year_Installed", "band": 0.5 },
+                                "y": { "scale": "y", "signal": "tooltip.Installation_Count", "band": -2 },
+                                "text": { "signal": "tooltip.Installation_Count" }
+                            }
+                        }
+                }
+                    
+            ]
+        }
+
+  //var d2 = {
+  //      "$schema": "https://vega.github.io/schema/vega/v3.0.json",
+  //          "width": 200,
+  //              "padding": 5,
+
+  //                  "signals": [
+  //                      { "name": "offset", "value": 15 },
+  //                      { "name": "cellHeight", "value": 100 },
+  //                      { "name": "height", "update": "6 * (offset + cellHeight)" }
+  //                  ],
+
+  //                      "data": data,
+
+  //                          "scales": [
+  //                              {
+  //                                  "name": "gscale",
+  //                                  "type": "band",
+  //                                  "range": [0, { "signal": "height" }],
+  //                                  "round": true,
+  //                                  "domain": {
+  //                                      "data": "pv",
+  //                                      "field": "Segment_Of_Use"
+  //                                      //,
+  //                                      //"sort": {
+  //                                      //    "field": "Year_Installed",
+  //                                      //    "op": "median",
+  //                                      //    "order": "descending"
+  //                                      //}
+  //                                  }
+  //                              },
+  //                              {
+  //                                  "name": "xscale",
+  //                                  "type": "linear",
+  //                                  "nice": true,
+  //                                  "range": "width",
+  //                                  "round": true,
+  //                                  "domain": { "data": "pv", "field": "Year_Installed" }
+  //                              }
+  //                              //,
+  //                              //{
+  //                              //    "name": "cscale",
+  //                              //    "type": "ordinal",
+  //                              //    "range": "category",
+  //                              //    "domain": { "data": "pv", "field": "Segment_of_Use" }
+  //                              //}
+  //                          ],
+
+  //                              "axes": [
+  //                                  { "orient": "bottom", "scale": "xscale", "zindex": 1 }
+  //                              ],
+
+  //                                  //"legends": [
+  //                                  //    {
+  //                                  //        "stroke": "cscale",
+  //                                  //        "title": "Segment of Use",
+  //                                  //        "padding": 4,
+  //                                  //        "encode": {
+  //                                  //            "symbols": {
+  //                                  //                "enter": {
+  //                                  //                    "strokeWidth": { "value": 2 },
+  //                                  //                    "size": { "value": 50 }
+  //                                  //                }
+  //                                  //            }
+  //                                  //        }
+  //                                  //    }
+  //                                  //],
+
+  //                                      "marks": [
+  //                                          {
+  //                                              "name": "Segment_Of_Use",
+  //                                              "type": "group",
+
+  //                                              "from": {
+  //                                                  "facet": {
+  //                                                      "data": "pv",
+  //                                                      "name": "segments",
+  //                                                      "groupby": "Segment_Of_Use"
+  //                                                  }
+  //                                              },
+
+  //                                              "encode": {
+  //                                                  "enter": {
+  //                                                      "y": { "scale": "gscale", "field": "Segment_Of_Use", "offset": { "signal": "offset" } },
+  //                                                      "height": { "signal": "cellHeight" },
+  //                                                      "width": { "signal": "width" },
+  //                                                      "stroke": { "value": "#ccc" }
+  //                                                  }
+  //                                              },
+
+  //                                              "scales": [
+  //                                                  {
+  //                                                      "name": "yscale",
+  //                                                      "type": "point",
+  //                                                      "range": [0, { "signal": "cellHeight" }],
+  //                                                      "padding": 1,
+  //                                                      "round": true,
+  //                                                      "domain": {
+  //                                                          "data": "pv",
+  //                                                          "field": "Avg_System_Size_Kw"
+  //                                                          //,
+  //                                                          //"sort": {
+  //                                                          //    "field": "Year_Installed",
+  //                                                          //    "op": "median",
+  //                                                          //    "order": "descending"
+  //                                                          //}
+  //                                                      }
+  //                                                  }
+  //                                              ],
+
+  //                                              "axes": [
+  //                                                  {
+  //                                                      "orient": "left",
+  //                                                      "scale": "yscale",
+  //                                                      "tickSize": 0,
+  //                                                      "domain": false,
+  //                                                      "grid": true,
+  //                                                      "encode": {
+  //                                                          "grid": {
+  //                                                              "enter": { "strokeDash": { "value": [3, 3] } }
+  //                                                          }
+  //                                                      }
+  //                                                  }
+  //                                                  //,
+  //                                                  //{
+  //                                                  //    "orient": "right",
+  //                                                  //    "scale": "yscale",
+  //                                                  //    "tickSize": 0,
+  //                                                  //    "domain": false
+  //                                                  //}
+  //                                              ],
+
+  //                                              "marks": [
+  //                                                  {
+  //                                                      "type": "symbol",
+  //                                                      "from": { "data": "segments" },
+  //                                                      "encode": {
+  //                                                          "enter": {
+  //                                                              "x": { "scale": "xscale", "field": "Year_Installed" },
+  //                                                              "y": { "scale": "yscale", "field": "Avg_System_Size_Kw" }
+  //                                                              //,
+  //                                                              //"stroke": { "scale": "cscale", "field": "Segment_of_Use" },
+  //                                                              //"strokeWidth": { "value": 2 },
+  //                                                              //"size": { "value": 50 }
+  //                                                          }
+  //                                                      }
+  //                                                  }
+  //                                              ]
+  //                                          },
+
+  //                                          {
+  //                                              "type": "text",
+  //                                              "from": { "data": "Segment_Of_Use" },
+  //                                              "encode": {
+  //                                                  "enter": {
+  //                                                      "x": { "field": "width", "mult": 0.5 },
+  //                                                      "y": { "field": "y" },
+  //                                                      "fontSize": { "value": 11 },
+  //                                                      "fontWeight": { "value": "bold" },
+  //                                                      "text": { "field": "datum.Segment_of_Use" },
+  //                                                      "align": { "value": "center" },
+  //                                                      "baseline": { "value": "bottom" },
+  //                                                      "fill": { "value": "#000" }
+  //                                                  }
+  //                                              }
+  //                                          }
+  //                                      ]
+
+  //  }
+
+    var d2 = {
+        "data": { "url": "/pv.json" },
+        "layer": [
+            {
+                //"$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+                //"data": { "url": "/pv.json" },
+                //"spec": {
+                    "mark": "bar",
+                    "encoding": {
+                        "x": {
+                            "field": "Year_Installed",
+                            "type": "nominal"
+                        },
+                        "y": {
+                            "field": "Avg_Cost_Per_Watt",
+                            "type": "quantitative"
+                        }
+                    }
+                //}
+            },
+            {
+                //"$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+                //"data": { "url": "/pv.json" },
+                
+                //"spec": {
+                    "mark": "line",
+                    "encoding": {
+                        "x": {
+                            "field": "Year_Installed",
+                            "type": "nominal"
+                        },
+                        "y": {
+                            "field": "Avg_System_Size_Kw",
+                            "type": "quantitative"
+                        }
+                    }
+                //}
+            }
+        ],
+        "resolve": {
+            "y":{"scale":"independent"}
+        }
+    }
+    //vega.embed('#viz', d);
+    vega.embed('#viz2', d2);
 </script>
 </body>
- 
+
 </html>
