@@ -6,11 +6,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
-    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/3.0.0-rc4/vega.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.0.0-beta.10/vega-lite.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.0.0-beta.19/vega-embed.js"></script>
-    <script src="data.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vega-tooltip/0.3.3/vega-tooltip.min.css"></link>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-tooltip/0.3.3/vega-tooltip.min.js"></script>
+    
 </head>
 <body>
 
@@ -30,6 +31,7 @@
         </div>
     </div>
     <div id="viz2"></div>
+    <div id="vis-tooltip" class="vg-tooltip"></div>
 </div>
 <script type="text/javascript">
     var selectedsegment = 'Residential';
@@ -130,8 +132,14 @@
                 "axis": "shared"
             }
         }
-    }
-    vega.embed('#viz2', d2);
+       }
+       var opt = {
+           mode: "vega-lite",
+       };
+       vega.embed('#viz2', d2, opt, function (error, result) {
+           // result.view is the Vega View, vlSpec is the original Vega-Lite specification
+           vegaTooltip.vegaLite(result.view, d2, options); // pass in options
+       });
 
     };
     //$(document).ready(function () {
