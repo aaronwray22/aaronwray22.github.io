@@ -18,6 +18,16 @@
 
     <div class="container">
         <h1 id="title">The Impact of Falling Costs on Solar Adoption</h1>
+        <button class="btn btn-secondary" type="button" id="aboutbutton">About the Visualization</button>
+        <p id="abouttext" style="display: none; font:bold 16px arial, verdana; background: white; width: 60%; height: 50%; z-index: 9999">
+            This dashboard displays a flow of sections containing multiple graphs that visualize the impact of falling costs on photovoltaic (PV) solar adoption. Data was taken from a public dataset offered at NREL's Open PV Project website. The original dataset is filtered on installation year to include only systems installed between the years 2000 and 2015 inclusive.
+
+            The top section of the dashboard depicts a running total of annual production as well as the average installation cost per watt of  PV solar system capacity for each Year of Installation.  Color helps to highlight Segment of Use, which is a custom field created to aggregate the various descriptions of Install Types belonging to the original dataset. An arguably obvious inference here is that the decline in average cost for a PV system has dramatically accelerated its adoption across all primary segments of use. The streamgraph style was chosen to help illuminate the way in which adoption increased and costs declined proportionally for all segments.
+
+            The bottom section of the dashboard allows you to drill down to compare the average cost per watt of installed system capacity with the average kW size of the PV system by sector. Segment of Use was applied to the section's rows so as to divide each segment into its own graph. In this case, color is used simply to distinguish between the two separate metrics with their respective scales. A dual axis bar and line graph was chosen to illuminate the divergence of costs falling as average installation size goes up. If you look closely, you may even notice a cyclic nature to the magnitude of divergence over a multi-year periodicity that is most notable in the commercial and government segments.
+
+            As you might obviously see, the cost of a PV installation have fallen dramatically over the past decade. Additionally, this phenomenon appears to be ubiquitous in all segments of use.
+        </p>
         <p>
             <span style="font:bold 18px arial, verdana; width:49%; display: inline-block">The cost of a PV system is falling each year!   <i class="fa fa-arrow-right" style="font-size:38px" aria-hidden="true"></i></span>
             <span style="font:bold 18px arial, verdana; width:49%; display: inline-block">Total solar production is rapidly increasing!   <i class="fa fa-arrow-down" style="font-size:38px" aria-hidden="true"></i></span>
@@ -44,6 +54,9 @@
     </div>
     <script type="text/javascript">
         var selectedsegment = 'Residential';
+        $('#aboutbutton').on('click', function () {
+            document.getElementById("abouttext").style.display = "block";
+        });
         $('#segmentlist').on('click', 'a', function () {
             selectedsegment = $(this).text();
             $('#segmentdropdown').text($(this).text());
@@ -64,6 +77,7 @@
                     $('#annotation').text("The installations with sector Unknown/Other have substantially increased their rate of photovoltaic system adoption since 2010.");
             }
         });
+
         var d = {
             "hconcat": [
                 {
@@ -121,6 +135,7 @@
             };
             vegaTooltip.vegaLite(result.view, d, tooltipOption);
         });
+        
         function updatevis(selection) {
 
 
