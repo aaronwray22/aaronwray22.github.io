@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/3.0.0-rc4/vega.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.0.0-beta.10/vega-lite.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.0.0-beta.19/vega-embed.js"></script>
@@ -12,299 +16,127 @@
 
 <div class="container">
     <h1 id="title">The Impact of Falling Costs on Solar Adoption</h1>
-    <div id="viz"></div>
+    <div id="viz"></div><br />
+    <div class="dropdown">
+        <!--<p style="font-size: 18px; font-style: italic">Select Segment of Use</p>-->
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="segmentdropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Click here to select a Segment of Use to view the sost/system size interactions.
+        </button>
+        <div id="segmentlist" class="dropdown-menu" aria-labelledby="segmentdropdown">
+            <a class="dropdown-item" href="#">Residential</a>
+            <a class="dropdown-item" href="#">Commercial</a>
+            <a class="dropdown-item" href="#">Government</a>
+            <a class="dropdown-item" href="#">Unknown/Other</a>
+        </div>
+    </div>
     <div id="viz2"></div>
 </div>
 <script type="text/javascript">
+    var selectedsegment = 'Residential';
+    $('#segmentlist').on('click', 'a', function () {
+        selectedsegment = $(this).text();
+        $('#segmentdropdown').text($(this).text());
+        updatevis(selectedsegment);
+    });
     var d =
         {
-            "$schema": "https://vega.github.io/schema/vega/v3.0.json",
-            "width": 400,
-            "height": 200,
-            "padding": { "top": 10, "left": 80, "bottom": 30, "right": 10 },
-            "data": data,
-            "scales": [
-                {
-                    "name": "x",
-                    "type": "band",
-                    "range": "width",
-                    "domain": { "data": "pv", "field": "Year_Installed" }
+            "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+            "width": 300, "height": 200,
+            "data": {
+                "url": "https://aaronwray22.github.io/pv.csv"
+            },
+            "mark": "area",
+            "encoding": {
+                "x": {
+                    "timeUnit": "year", "field": "Date Installed", "type": "temporal",
+                    "scale": { "nice": "year" },
+                    "axis": { "domain": false, "format": "%Y", "labelAngle": 0, "tickSize": 0 }
                 },
-                {
-                    "name": "y",
-                    "type": "linear",
-                    "range": "height",
-                    "nice": true,
-                    "zero": true,
-                    "domain": { "data": "pv", "field": "Installation_Count" }
-                }
-            ],
-            "axes": [
-                { "orient": "bottom", "scale": "x" },
-                { "orient": "left", "scale": "y" }
-            ],
-           "signals": [
-                {
-                  "name": "tooltip",
-                  "value": {},
-                  "on": [
-                    {"events": "rect:mouseover", "update": "datum"},
-                    {"events": "rect:mouseout",  "update": "{}"}
-                  ]
-                }
-              ],
-            "marks": [
-                {
-                    "type": "rect",
-                    "from": { "data": "pv" },
-                    "encode": {
-                        "enter": {
-                            "x": { "scale": "x", "field": "Year_Installed", "offset": 1 },
-                            "width": { "scale": "x", "band": 1, "offset": -1 },
-                            "y": { "scale": "y", "field": "Installation_Count" },
-                            "y2": { "scale": "y", "value": 0 }
-                        },
-                        "update": {
-                            "fill": { "value": "steelblue" }
-                        },
-                        "hover": {
-                            "fill": { "value": "red" }
-                        }
-                    }
-                },{
-                        "type": "text",
-                        "encode": {
-                            "enter": {
-                                "align": { "value": "center" },
-                                "baseline": { "value": "bottom" },
-                                "fill": { "value": "#333" }
-
-                            },
-                            "update": {
-                                "x": { "scale": "x", "signal": "tooltip.Year_Installed", "band": 0.5 },
-                                "y": { "scale": "y", "signal": "tooltip.Installation_Count", "band": -2 },
-                                "text": { "signal": "tooltip.Installation_Count" }
-                            }
-                        }
-                }
-                    
-            ]
+                "y": {
+                    "aggregate": "sum", "field": "KWH Production", "type": "quantitative",
+                    "axis": null,
+                    "stack": "center"
+                },
+                "color": { "field": "Segment of Use", "type": "nominal", "scale": { "scheme": "tableau10" } }
+            }
         }
 
-  //var d2 = {
-  //      "$schema": "https://vega.github.io/schema/vega/v3.0.json",
-  //          "width": 200,
-  //              "padding": 5,
+    vega.embed('#viz', d);
+   function updatevis (selection) {
 
-  //                  "signals": [
-  //                      { "name": "offset", "value": 15 },
-  //                      { "name": "cellHeight", "value": 100 },
-  //                      { "name": "height", "update": "6 * (offset + cellHeight)" }
-  //                  ],
-
-  //                      "data": data,
-
-  //                          "scales": [
-  //                              {
-  //                                  "name": "gscale",
-  //                                  "type": "band",
-  //                                  "range": [0, { "signal": "height" }],
-  //                                  "round": true,
-  //                                  "domain": {
-  //                                      "data": "pv",
-  //                                      "field": "Segment_Of_Use"
-  //                                      //,
-  //                                      //"sort": {
-  //                                      //    "field": "Year_Installed",
-  //                                      //    "op": "median",
-  //                                      //    "order": "descending"
-  //                                      //}
-  //                                  }
-  //                              },
-  //                              {
-  //                                  "name": "xscale",
-  //                                  "type": "linear",
-  //                                  "nice": true,
-  //                                  "range": "width",
-  //                                  "round": true,
-  //                                  "domain": { "data": "pv", "field": "Year_Installed" }
-  //                              }
-  //                              //,
-  //                              //{
-  //                              //    "name": "cscale",
-  //                              //    "type": "ordinal",
-  //                              //    "range": "category",
-  //                              //    "domain": { "data": "pv", "field": "Segment_of_Use" }
-  //                              //}
-  //                          ],
-
-  //                              "axes": [
-  //                                  { "orient": "bottom", "scale": "xscale", "zindex": 1 }
-  //                              ],
-
-  //                                  //"legends": [
-  //                                  //    {
-  //                                  //        "stroke": "cscale",
-  //                                  //        "title": "Segment of Use",
-  //                                  //        "padding": 4,
-  //                                  //        "encode": {
-  //                                  //            "symbols": {
-  //                                  //                "enter": {
-  //                                  //                    "strokeWidth": { "value": 2 },
-  //                                  //                    "size": { "value": 50 }
-  //                                  //                }
-  //                                  //            }
-  //                                  //        }
-  //                                  //    }
-  //                                  //],
-
-  //                                      "marks": [
-  //                                          {
-  //                                              "name": "Segment_Of_Use",
-  //                                              "type": "group",
-
-  //                                              "from": {
-  //                                                  "facet": {
-  //                                                      "data": "pv",
-  //                                                      "name": "segments",
-  //                                                      "groupby": "Segment_Of_Use"
-  //                                                  }
-  //                                              },
-
-  //                                              "encode": {
-  //                                                  "enter": {
-  //                                                      "y": { "scale": "gscale", "field": "Segment_Of_Use", "offset": { "signal": "offset" } },
-  //                                                      "height": { "signal": "cellHeight" },
-  //                                                      "width": { "signal": "width" },
-  //                                                      "stroke": { "value": "#ccc" }
-  //                                                  }
-  //                                              },
-
-  //                                              "scales": [
-  //                                                  {
-  //                                                      "name": "yscale",
-  //                                                      "type": "point",
-  //                                                      "range": [0, { "signal": "cellHeight" }],
-  //                                                      "padding": 1,
-  //                                                      "round": true,
-  //                                                      "domain": {
-  //                                                          "data": "pv",
-  //                                                          "field": "Avg_System_Size_Kw"
-  //                                                          //,
-  //                                                          //"sort": {
-  //                                                          //    "field": "Year_Installed",
-  //                                                          //    "op": "median",
-  //                                                          //    "order": "descending"
-  //                                                          //}
-  //                                                      }
-  //                                                  }
-  //                                              ],
-
-  //                                              "axes": [
-  //                                                  {
-  //                                                      "orient": "left",
-  //                                                      "scale": "yscale",
-  //                                                      "tickSize": 0,
-  //                                                      "domain": false,
-  //                                                      "grid": true,
-  //                                                      "encode": {
-  //                                                          "grid": {
-  //                                                              "enter": { "strokeDash": { "value": [3, 3] } }
-  //                                                          }
-  //                                                      }
-  //                                                  }
-  //                                                  //,
-  //                                                  //{
-  //                                                  //    "orient": "right",
-  //                                                  //    "scale": "yscale",
-  //                                                  //    "tickSize": 0,
-  //                                                  //    "domain": false
-  //                                                  //}
-  //                                              ],
-
-  //                                              "marks": [
-  //                                                  {
-  //                                                      "type": "symbol",
-  //                                                      "from": { "data": "segments" },
-  //                                                      "encode": {
-  //                                                          "enter": {
-  //                                                              "x": { "scale": "xscale", "field": "Year_Installed" },
-  //                                                              "y": { "scale": "yscale", "field": "Avg_System_Size_Kw" }
-  //                                                              //,
-  //                                                              //"stroke": { "scale": "cscale", "field": "Segment_of_Use" },
-  //                                                              //"strokeWidth": { "value": 2 },
-  //                                                              //"size": { "value": 50 }
-  //                                                          }
-  //                                                      }
-  //                                                  }
-  //                                              ]
-  //                                          },
-
-  //                                          {
-  //                                              "type": "text",
-  //                                              "from": { "data": "Segment_Of_Use" },
-  //                                              "encode": {
-  //                                                  "enter": {
-  //                                                      "x": { "field": "width", "mult": 0.5 },
-  //                                                      "y": { "field": "y" },
-  //                                                      "fontSize": { "value": 11 },
-  //                                                      "fontWeight": { "value": "bold" },
-  //                                                      "text": { "field": "datum.Segment_of_Use" },
-  //                                                      "align": { "value": "center" },
-  //                                                      "baseline": { "value": "bottom" },
-  //                                                      "fill": { "value": "#000" }
-  //                                                  }
-  //                                              }
-  //                                          }
-  //                                      ]
-
-  //  }
 
     var d2 = {
-        "data": { "url": "/pv.json" },
+        "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+        "data": {
+            "url": "https://aaronwray22.github.io/pv.csv"
+        },
         "layer": [
             {
-                //"$schema": "https://vega.github.io/schema/vega-lite/v2.json",
-                //"data": { "url": "/pv.json" },
-                //"spec": {
-                    "mark": "bar",
-                    "encoding": {
-                        "x": {
-                            "field": "Year_Installed",
-                            "type": "nominal"
-                        },
-                        "y": {
-                            "field": "Avg_Cost_Per_Watt",
-                            "type": "quantitative"
+                "transform": [
+                    { "filter": { "field": "Segment of Use", "equal": selection } }
+                ],
+                "mark": "line",
+                "encoding": {
+                    "x": {
+                        "timeUnit": "year",
+                        "field": "Date Installed",
+                        "type": "temporal"
+                    },
+                    "y": {
+                        "aggregate": "mean",
+                        "field": "Cost Per Watt",
+                        "type": "quantitative",
+                        "axis": {
+                            "grid": false
                         }
                     }
-                //}
+                }
             },
             {
-                //"$schema": "https://vega.github.io/schema/vega-lite/v2.json",
-                //"data": { "url": "/pv.json" },
-                
-                //"spec": {
-                    "mark": "line",
-                    "encoding": {
-                        "x": {
-                            "field": "Year_Installed",
-                            "type": "nominal"
+                "transform": [
+                    { "filter": { "field": "Segment of Use", "equal": selection } }
+                ],
+                "mark": "line",
+                "encoding": {
+                    "x": {
+                        "timeUnit": "year",
+                        "field": "Date Installed",
+                        "type": "temporal"
+                    },
+                    "y": {
+                        "aggregate": "mean",
+                        "field": "Avg System KW",
+                        "type": "quantitative",
+                        "axis": {
+                            "grid": false
                         },
-                        "y": {
-                            "field": "Avg_System_Size_Kw",
-                            "type": "quantitative"
+                        "scale": {
+                            "zero": false
                         }
+                    },
+                    "color": {
+                        "value": "darkorange"
                     }
-                //}
+                }
             }
         ],
         "resolve": {
-            "y":{"scale":"independent"}
+            "y": {
+                "scale": "independent",
+                "axis": "independent"
+            },
+            "x": {
+                "scale": "shared",
+                "axis": "shared"
+            }
         }
     }
-    //vega.embed('#viz', d);
     vega.embed('#viz2', d2);
+
+    };
+    //$(document).ready(function () {
+    //    updatevis;
+    //});
 </script>
 </body>
 
