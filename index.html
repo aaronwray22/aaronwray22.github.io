@@ -6,194 +6,215 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.0.0-beta.3/vega-lite.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vega/3.0.0-beta.31/vega.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.0.0-beta.14/vega-embed.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vega-tooltip/0.3.3/vega-tooltip.min.css"></link>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vega-tooltip/0.3.3/vega-tooltip.min.js"></script>
-    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.0.0-beta.3/vega-lite.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/3.0.0-beta.31/vega.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/3.0.0-beta.14/vega-embed.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vega-tooltip/0.3.3/vega-tooltip.min.css"></link>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-tooltip/0.3.3/vega-tooltip.min.js"></script>
+
 </head>
 <body>
 
-<div class="container">
-    <h1 id="title">The Impact of Falling Costs on Solar Adoption</h1>
- <p><span style="font:bold 18px arial, verdana; width:49%; display: inline-block">The cost of a PV system is falling each year!   <i class="fa fa-arrow-right" style="font-size:38px" aria-hidden="true"></i></span>
-     <span style="font:bold 18px arial, verdana; width:49%; display: inline-block">Total solar production is rapidly increasing!   <i class="fa fa-arrow-down" style="font-size:38px" aria-hidden="true"></i></span>
-    </p>
-    <div id="viz"></div><br />
-    <div class="dropdown">
-        <!--<p style="font-size: 18px; font-style: italic">Select Segment of Use</p>-->
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="segmentdropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Click here to view the cost and system size (kw) interaction by Segment of Use.
-        </button><span style="float: right"><i class="fa fa-arrow-left" style="font-size:38px" aria-hidden="true"></i></span>
-        <div id="segmentlist" class="dropdown-menu" aria-labelledby="segmentdropdown">
-            <a class="dropdown-item" href="#">Residential</a>
-            <a class="dropdown-item" href="#">Commercial</a>
-            <a class="dropdown-item" href="#">Government</a>
-            <a class="dropdown-item" href="#">Unknown/Other</a>
+    <div class="container">
+        <h1 id="title">The Impact of Falling Costs on Solar Adoption</h1>
+        <p>
+            <span style="font:bold 18px arial, verdana; width:49%; display: inline-block">The cost of a PV system is falling each year!   <i class="fa fa-arrow-right" style="font-size:38px" aria-hidden="true"></i></span>
+            <span style="font:bold 18px arial, verdana; width:49%; display: inline-block">Total solar production is rapidly increasing!   <i class="fa fa-arrow-down" style="font-size:38px" aria-hidden="true"></i></span>
+        </p>
+        <div id="viz"></div><br />
+        <div class="dropdown">
+            <!--<p style="font-size: 18px; font-style: italic">Select Segment of Use</p>-->
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="segmentdropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Click here to view the cost and system size interaction by Segment of Use.
+            </button><span style="float: right"><i class="fa fa-arrow-left" style="font-size:38px" aria-hidden="true"></i></span>
+            <div id="segmentlist" class="dropdown-menu" aria-labelledby="segmentdropdown">
+                <a class="dropdown-item" href="#">Residential</a>
+                <a class="dropdown-item" href="#">Commercial</a>
+                <a class="dropdown-item" href="#">Government</a>
+                <a class="dropdown-item" href="#">Unknown/Other</a>
+            </div>
         </div>
+        <div>
+            <br />
+            <span id="viz2" style="float: left; width: 505px"></span><span id="annotation" style="float: right; width:300px; font: bold 14px arial, verdana"></span>
+        </div>
+        <div id="vis-tooltip" class="vg-tooltip"></div>
+
     </div>
-    <div id="viz2"></div>
-    <div id="vis-tooltip" class="vg-tooltip"></div>
-</div>
-<script type="text/javascript">
-    var selectedsegment = 'Residential';
-    $('#segmentlist').on('click', 'a', function () {
-        selectedsegment = $(this).text();
-        $('#segmentdropdown').text($(this).text());
-        updatevis(selectedsegment);
-    });
-    var d = {
-        "hconcat": [
-            {
-                "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
-                "width": 300, "height": 200,
-                "data": {
-                    "url": "https://aaronwray22.github.io/pv.csv"
-                },
-                "mark": "line",
-                "encoding": {
-                    "x": {
-                        "timeUnit": "year", "field": "Date Installed", "type": "temporal",
-                        "scale": { "nice": "year" },
-                        "axis": { "domain": false, "format": "%Y", "labelAngle": 0, "tickSize": 0, "title":"Annual Average Cost Per Watt Installed" }
-                    },
-                    "y": {
-                        "aggregate": "mean", "field": "Cost Per Watt", "type": "quantitative", "axis":null
-                    },
-                    "color": { "field": "Segment of Use", "type": "nominal", "scale": { "scheme": "tableau10" } }
-                }
-            },
-            {
-                "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
-                "width": 300, "height": 200,
-                "data": {
-                    "url": "https://aaronwray22.github.io/pv.csv"
-                },
-                "mark": "area",
-                "encoding": {
-                    "x": {
-                        "timeUnit": "year", "field": "Date Installed", "type": "temporal",
-                        "scale": { "nice": "year" },
-                        "axis": { "domain": false, "format": "%Y", "labelAngle": 0, "tickSize": 0, "title":"Running Total Annual kWh Production" }
-                    },
-                    "y": {
-                        "aggregate": "sum", "field": "KWH Production", "type": "quantitative",
-                        "axis": null,
-                        "stack": "center"
-                    },
-                    "color": { "field": "Segment of Use", "type": "nominal", "scale": { "scheme": "tableau10" } }
-                }
+    <script type="text/javascript">
+        var selectedsegment = 'Residential';
+        $('#segmentlist').on('click', 'a', function () {
+            selectedsegment = $(this).text();
+            $('#segmentdropdown').text($(this).text());
+            updatevis(selectedsegment);
+            switch (selectedsegment) {
+                case "Residential":
+                    $('#annotation').text('The residential sector is closely reciprocating the decline in photovoltaic system costs with an equal or greater rate of adoption.');
+                    break;
+                case "Government":
+                    $('#annotation').text('The Government sector is closely reciprocating the decline in photovoltaic system costs with an equal or greater rate of adoption as well as a few years where the size of system installations were larger than normal.');
+
+                    break;
+                case "Commercial":
+                    $('#annotation').text('The installations within the Commercial sector appear to be driven by contractual terms due to the multi-year cyclic nature of photovoltaic system adoption.');
+
+                    break;
+                default:
+                    $('#annotation').text("The installations with sector Unknown/Other have substantially increased their rate of photovoltaic system adoption since 2010.");
             }
-        ]
-    }
-    var opt = {
-        mode: "vega-lite",
-    };
-    vega.embed('#viz', d, opt, function (error, result) {
-        var tooltipOption = {
-            showAllFields: false,
-            fields: [
-                { field: "Segment of Use" },
-                { field: "KWH Production" } 
+        });
+        var d = {
+            "hconcat": [
+                {
+                    "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+                    "width": 300, "height": 200,
+                    "data": {
+                        "url": "https://aaronwray22.github.io/pv.csv"
+                    },
+                    "mark": "line",
+                    "encoding": {
+                        "x": {
+                            "timeUnit": "year", "field": "Date Installed", "type": "temporal",
+                            "scale": { "nice": "year" },
+                            "axis": { "domain": false, "format": "%Y", "labelAngle": 0, "tickSize": 0, "title": "Annual Average Cost Per Watt Installed" }
+                        },
+                        "y": {
+                            "aggregate": "mean", "field": "Cost Per Watt", "type": "quantitative", "axis": null
+                        },
+                        "color": { "field": "Segment of Use", "type": "nominal", "scale": { "scheme": "tableau10" } }
+                    }
+                },
+                {
+                    "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+                    "width": 300, "height": 200,
+                    "data": {
+                        "url": "https://aaronwray22.github.io/pv.csv"
+                    },
+                    "mark": "area",
+                    "encoding": {
+                        "x": {
+                            "timeUnit": "year", "field": "Date Installed", "type": "temporal",
+                            "scale": { "nice": "year" },
+                            "axis": { "domain": false, "format": "%Y", "labelAngle": 0, "tickSize": 0, "title": "Running Total Annual kWh Production" }
+                        },
+                        "y": {
+                            "aggregate": "sum", "field": "KWH Production", "type": "quantitative",
+                            "axis": null,
+                            "stack": "center"
+                        },
+                        "color": { "field": "Segment of Use", "type": "nominal", "scale": { "scheme": "tableau10" } }
+                    }
+                }
             ]
-        };
-        vegaTooltip.vegaLite(result.view, d, tooltipOption);
-    });
-   function updatevis (selection) {
-
-
-    var d2 = {
-        "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
-        "width": 600, "height": 300,
-        "data": {
-            "url": "https://aaronwray22.github.io/pv.csv"
-        },
-        "layer": [
-            {
-                "transform": [
-                    { "filter": { "field": "Segment of Use", "equal": selection } }
-                ],
-                "mark": "line",
-                "encoding": {
-                    "x": {
-                        "timeUnit": "year",
-                        "field": "Date Installed",
-                        "type": "temporal",
-                        "axis": {
-                            "title":"Year Installed"
-                        }
-                    },
-                    "y": {
-                        "aggregate": "mean",
-                        "field": "Cost Per Watt",
-                        "type": "quantitative",
-                        "axis": {
-                            "title": "Cost Per Watt",
-                            "grid": false
-                        }
-                    }
-                }
-            },
-            {
-                "transform": [
-                    { "filter": { "field": "Segment of Use", "equal": selection } }
-                ],
-                "mark": "line",
-                "encoding": {
-                    "x": {
-                        "timeUnit": "year",
-                        "field": "Date Installed",
-                        "axis": {
-                            "title": "Year Installed"
-                        },
-                        "type": "temporal"
-                    },
-                    "y": {
-                        "aggregate": "mean",
-                        "field": "Avg System KW",
-                        "type": "quantitative",
-                        "axis": {
-                            "grid": false,
-                            "title": "Avg System KW"
-                        },
-                        "scale": {
-                            "zero": false
-                        }
-                    },
-                    "color": {
-                        "value": "darkorange"
-                    }
-                }
-            }
-        ],
-        "resolve": {
-            "y": {
-                "scale": "independent",
-                "axis": "independent"
-            },
-            "x": {
-                "scale": "shared",
-                "axis": "shared"
-            }
         }
-       }
-       var opt = {
-           mode: "vega-lite",
-       };
-       vega.embed('#viz2', d2, opt, function (error, result) {
-           var tooltipOption = {
-               showAllFields: false,
-               fields: [
-                   { field: "Avg System KW", title: "Avg System KW" },
-                   { field: "Cost Per Watt", title: "Avg Cost Per Watt" }
-               ]
-           };
-           vegaTooltip.vegaLite(result.view, d2, tooltipOption);
-       });
+        var opt = {
+            mode: "vega-lite",
+        };
+        vega.embed('#viz', d, opt, function (error, result) {
+            var tooltipOption = {
+                showAllFields: false,
+                fields: [
+                    { field: "Segment of Use" },
+                    { field: "KWH Production" }
+                ]
+            };
+            vegaTooltip.vegaLite(result.view, d, tooltipOption);
+        });
+        function updatevis(selection) {
 
-    };
-</script>
+
+            var d2 = {
+                "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+                "width": 490, "height": 300,
+                "data": {
+                    "url": "https://aaronwray22.github.io/pv.csv"
+                },
+                "layer": [
+                    {
+                        "transform": [
+                            { "filter": { "field": "Segment of Use", "equal": selection } }
+                        ],
+                        "mark": "line",
+                        "encoding": {
+                            "x": {
+                                "timeUnit": "year",
+                                "field": "Date Installed",
+                                "type": "temporal",
+                                "axis": {
+                                    "title": "Year Installed"
+                                }
+                            },
+                            "y": {
+                                "aggregate": "mean",
+                                "field": "Cost Per Watt",
+                                "type": "quantitative",
+                                "axis": {
+                                    "title": "Cost Per Watt (Blue)",
+                                    "grid": false
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "transform": [
+                            { "filter": { "field": "Segment of Use", "equal": selection } }
+                        ],
+                        "mark": "line",
+                        "encoding": {
+                            "x": {
+                                "timeUnit": "year",
+                                "field": "Date Installed",
+                                "axis": {
+                                    "title": "Year Installed"
+                                },
+                                "type": "temporal"
+                            },
+                            "y": {
+                                "aggregate": "mean",
+                                "field": "Avg System KW",
+                                "type": "quantitative",
+                                "axis": {
+                                    "grid": false,
+                                    "title": "Avg System KW (Orange)"
+                                },
+                                "scale": {
+                                    "zero": false
+                                }
+                            },
+                            "color": {
+                                "value": "darkorange"
+                            }
+                        }
+                    }
+                ],
+                "resolve": {
+                    "y": {
+                        "scale": "independent",
+                        "axis": "independent"
+                    },
+                    "x": {
+                        "scale": "shared",
+                        "axis": "shared"
+                    }
+                }
+            }
+            var opt = {
+                mode: "vega-lite",
+            };
+            vega.embed('#viz2', d2, opt, function (error, result) {
+                var tooltipOption = {
+                    showAllFields: false,
+                    fields: [
+                        { field: "Avg System KW", title: "Avg System KW" },
+                        { field: "Cost Per Watt", title: "Avg Cost Per Watt" }
+                    ]
+                };
+                vegaTooltip.vegaLite(result.view, d2, tooltipOption);
+            });
+
+        };
+    </script>
 </body>
 
 </html>
